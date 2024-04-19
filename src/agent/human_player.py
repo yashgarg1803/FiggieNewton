@@ -179,13 +179,13 @@ class HumanPlayer:
             if (self.start_round):
                 await controller.start_round(websocket)
             self.print_help()
-            while (not await controller.round_started(websocket)):
+            while (await controller.round_started(websocket) == None):
                 # Wait until round starts
                 pass
             while True:
-                # game_state = await controller.get_game_update(websocket)
-                # print("Current game state:")
-                # pp.print_state(game_state)
+                game_state = await controller.get_game_update(websocket)
+                print("Current game state:")
+                pp.print_state(game_state)
                 cmd_str = input("Make an action (type h or help for help): ")
                 cmd_ok, cmd = self.parse_cmd(cmd_str)
                 while (not cmd_ok):

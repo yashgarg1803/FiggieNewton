@@ -96,8 +96,9 @@ async def start_round():
         for player in players.values():
             player.balance -= 50
             pot += 50
+    for player in players.values():
+        await player.websocket.send_json({"type": "start_round", "data": {"player": player.privateToDict()}})
 
-    await broadcast({"type": "start_round"})
     print("Starting round...")
 
 

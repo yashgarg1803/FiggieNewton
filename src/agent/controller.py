@@ -1,5 +1,8 @@
 import json
 
+async def start_game(ws):
+    start_json = {"type": "start_game", "data":{}}
+    await ws.send(json.dumps(start_json))
 
 async def add_player(ws, player_id):
     '''
@@ -100,4 +103,6 @@ async def round_started(ws) -> bool:
     is of type "start_round", false otherwise.
     '''
     game_state = await get_game_update(ws)
-    return game_state["type"] == "start_round"
+    if(game_state["type"] == "start_round"):
+        return game_state["data"]["player"]
+    return NOne

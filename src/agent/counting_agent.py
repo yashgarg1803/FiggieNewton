@@ -14,8 +14,8 @@ uri = "ws://127.0.0.1:8000/ws"
 
 
 class CardCounter():
-    def __init__(self, start_round):
-        self.player_id = "Cardcounting bot"
+    def __init__(self, start_round, id="Card Counting Bot"):
+        self.player_id = id
         self.count = {}
         self.start_round = start_round
 
@@ -24,7 +24,7 @@ class CardCounter():
             await controller.add_player(websocket, self.player_id)
             if (self.start_round):
                 await controller.start_round(websocket)
-            while (not await controller.round_started(websocket)):
+            while (await controller.round_started(websocket) == None):
                 # Wait until round starts
                 pass
             while True:
@@ -42,5 +42,5 @@ class CardCounter():
                             "Expected sell: " + str(cardcounting.expected_value_sell(s, self.hand[s], dist)))
 
 
-cardcounter = CardCounter(start_round=False)
+cardcounter = CardCounter(start_round=False, id="1")
 asyncio.get_event_loop().run_until_complete(cardcounter.run())

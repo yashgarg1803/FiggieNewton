@@ -30,11 +30,12 @@ class RandomPlayer:
             await controller.add_player(websocket, self.player_id)
             if (self.start_round):
                 await controller.start_round(websocket)
+            
             request = await controller.get_game_update(websocket)
             # request should either be add_player
             # or an error saying that player already exists
             pp.print_state(request)
-            while (not await controller.round_started(websocket)):
+            while (await controller.round_started(websocket) == None):
                 # Wait until round starts
                 pass
             while True:
