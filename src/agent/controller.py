@@ -105,4 +105,4 @@ async def round_started(ws) -> bool:
     game_state = await get_game_update(ws)
     if(game_state["type"] == "start_round"):
         return game_state["data"]["player"]
-    return NOne
+    return None

@@ -13,7 +13,7 @@ async def websocket_endpoint(websocket: WebSocket):
         try:
             request = await websocket.receive_json()
             data = request['data']
-
+            
             if request['type'] == 'start_game':
                 await game.start_game()
 

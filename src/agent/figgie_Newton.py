@@ -29,10 +29,26 @@ class FiggieNewton:
         for suit in starting_hand:
             self.values[suit] = 3
     
-    async def accept_bids(self, websocket, orders):
+    def pdfAccept(self, order):
+        cutoff = random.randint(self.values[order["suit"]], self.values[order["suit"]] + self.pAccept)
+        print(cutoff, order["price"])
+        if(order["price"] >= cutoff):
+            print("Accepting Bid")
+            return True
+        return False
+
+    def accept_bids(self, orders):
+        best = 0
+        suit = None
         for order in orders:
-            await controller.accept_bid(websocket, self.player_id, order["suit"])
-        return True
+            if(self.pdfAccept(order)):
+                diff = order["price"] - self.values[order["suit"]]
+                print(diff, best)
+                if(diff > best):
+                    best = diff
+                    suit = order["suit"]
+        return suit
+            
 
     async def run(self):
         async with websockets.connect(uri) as websocket:
@@ -54,16 +70,21 @@ class FiggieNewton:
             
             hand = playerInfo["hand"]
             self.assign_prior(hand)
+            print(hand)
+            print(self.values)
 
-            game_state = request
             while True:
+                game_state = await controller.get_game_update(websocket)                
+
+                
                 #handle bids
                 #Find positive ev bids and decide whether or not to accept them
                 order_book = None
 
                 if ("order_book" in game_state["data"].keys()):
                     order_book = game_state["data"]["order_book"]
-                
+            
+
                 if(order_book != None):                
                     positiveBids = []
 
@@ -75,8 +96,11 @@ class FiggieNewton:
                             positiveBids.append(order)
                         print(order["player_id"], "bids",
                             order["suit"], "at price", order["price"])
-                    
-                    self.accept_bids(positiveBids)
+                    print("Positive Bids:")
+                    print(positiveBids)
+                    suit = self.accept_bids(positiveBids)
+                    if(suit != None):
+                        await controller.accept_bid(websocket, self.player_id, suit)
                 
                 accepted_order = None
                 if (game_state["type"] == "accept_order"):
@@ -88,12 +112,10 @@ class FiggieNewton:
                     self.c = self.c + 1
                     
 
-
+                pp.print_state(game_state)
                 #handle listings
                 await asyncio.sleep(1)
-                game_state = await controller.get_game_update(websocket)                
-
-                pp.print_state(game_state)
+                
 
 
 figgieBot = FiggieNewton(

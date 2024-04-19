@@ -1,6 +1,6 @@
 from .classes import Bid, Offer
 
-BROADCAST_PERIOD = 10
+BROADCAST_PERIOD = 5
 
 # Suits
 HEARTS = "hearts"

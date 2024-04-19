@@ -130,6 +130,7 @@ class HumanPlayer:
         if (cmd.command_type == CmdType.HELP):
             self.print_help()
         if (cmd.command_type == CmdType.BID):
+            print("here")
             await controller.place_bid(
                 websocket,
                 self.player_id,
