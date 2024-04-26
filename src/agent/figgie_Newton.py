@@ -5,6 +5,7 @@ import controller
 import random
 import pretty_printer as pp
 import sys
+import cardcounting
 sys.path.insert(0, "../")
 from util.constants import SUITS, EMPTY_ORDER_BOOK, HEARTS, SPADES, CLUBS, DIAMONDS, EMPTY_BID, EMPTY_OFFER, BROADCAST_PERIOD
 # fmt: on
@@ -26,8 +27,9 @@ class FiggieNewton:
         self.values = {CLUBS: 0, DIAMONDS: 0, HEARTS: 0, SPADES: 0} #valuation of a card of suit
 
     def assign_prior(self, starting_hand):
+        deck_dist = cardcounting.deck_distribution([starting_hand])
         for suit in starting_hand:
-            self.values[suit] = 3
+            self.values[suit] = cardcounting.expected_value_buy(suit, starting_hand[suit], deck_dist)
     
     def pdfAccept(self, order):
         cutoff = random.randint(self.values[order["suit"]], self.values[order["suit"]] + self.pAccept)
