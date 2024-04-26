@@ -41,7 +41,7 @@ async def websocket_endpoint(websocket: WebSocket):
             print('Disconnecting client...')
             break
 
-        except Exception as e:
-            print('error:', e)
+        # except Exception as e:
+        #     print('error:', e)
 
     print('Disconnecting client...')

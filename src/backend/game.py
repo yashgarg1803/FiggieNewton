@@ -86,7 +86,7 @@ async def start_round():
 
     goal_suit = SUITS[random.randint(0, 3)]
     deal_cards()
-    Timer(240)
+    Timer(30)
     enough_money = True
     for player in players.values():
         if player.balance < 50:
@@ -143,6 +143,10 @@ async def end_round():
     num_round_winners = len(round_winners)
     for player_id in round_winners:
         players[player_id].balance += pot/num_round_winners
+
+    for player in players:
+        print(player)
+        print(players[player].balance)
 
     goal_suit = SUITS[random.randint(0, 3)]
     pot = 0
@@ -268,6 +272,17 @@ async def accept_order(acceptor_id, is_bid, suit):
     # print("In accept_order 1")
     order = order_book["bids" if is_bid else "offers"][suit]
     websocket = players[acceptor_id].websocket
+    
+    print(order.toDict())
+    if order.order_id == -1:
+        await websocket.send_json({
+            "type": "error",
+            "data": {
+                "message": "Order could not be fulfilled.",
+                "order_book": order_book_to_dict(order_book)
+            }
+        })
+        return
 
     if order.player_id == acceptor_id:
         return

@@ -96,9 +96,14 @@ class FiggieNewton:
                     game_state = await controller.get_game_update(websocket)                
                 
                     order_book = None
+                    
 
-                    if ("order_book" in game_state["data"].keys()):
-                        order_book = game_state["data"]["order_book"]
+                    try:
+                        if ("order_book" in game_state["data"].keys()):
+                            order_book = game_state["data"]["order_book"]
+                    except:
+                        await asyncio.sleep(1)
+                        continue
                 
 
                     if(order_book != None):   
