@@ -184,17 +184,21 @@ class HumanPlayer:
                 # Wait until round starts
                 pass
             while True:
-                game_state = await controller.get_game_update(websocket)
-                print("Current game state:")
-                pp.print_state(game_state)
-                cmd_str = input("Make an action (type h or help for help): ")
-                cmd_ok, cmd = self.parse_cmd(cmd_str)
-                while (not cmd_ok):
-                    print("The command you entered is malformed.")
-                    cmd_str = input(
-                        "Make an action (type h or help for help): ")
+                try:
+                    game_state = await controller.get_game_update(websocket)
+                    print("Current game state:")
+                    pp.print_state(game_state)
+                    cmd_str = input("Make an action (type h or help for help): ")
                     cmd_ok, cmd = self.parse_cmd(cmd_str)
-                await self.run_cmd(websocket, cmd)
+                    while (not cmd_ok):
+                        print("The command you entered is malformed.")
+                        cmd_str = input(
+                            "Make an action (type h or help for help): ")
+                        cmd_ok, cmd = self.parse_cmd(cmd_str)
+                    await self.run_cmd(websocket, cmd)
+                except websockets.ConnectionClosed as e:
+                    websockt = await websockets.connect(uri)
+                
 
 
 human_player = HumanPlayer(start_round=False)

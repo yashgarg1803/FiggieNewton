@@ -37,12 +37,27 @@ class FiggieNewton:
             return True
         return False
 
-    def accept_bids(self, orders):
+    def pdfOffer(self, order):
+        cutoff = random.randint(self.values[order["suit"]] - self.pList, self.values[order["suit"]])
+        print(cutoff, order["price"])
+        if(order["price"] <= cutoff):
+            print("Accepting Offer")
+            return True
+        return False
+
+    def accept_listings(self, orders, isBid):
         best = 0
         suit = None
         for order in orders:
-            if(self.pdfAccept(order)):
+            if(isBid and self.pdfAccept(order)):
                 diff = order["price"] - self.values[order["suit"]]
+                print(diff, best)
+                if(diff > best):
+                    best = diff
+                    suit = order["suit"]
+
+            if(not isBid and self.pdfOffer(order)):
+                diff = self.values[order["suit"]] - order["price"]
                 print(diff, best)
                 if(diff > best):
                     best = diff
@@ -74,48 +89,72 @@ class FiggieNewton:
             print(self.values)
 
             while True:
-                game_state = await controller.get_game_update(websocket)                
-
+                try:
+                    game_state = await controller.get_game_update(websocket)                
                 
-                #handle bids
-                #Find positive ev bids and decide whether or not to accept them
-                order_book = None
+                    order_book = None
 
-                if ("order_book" in game_state["data"].keys()):
-                    order_book = game_state["data"]["order_book"]
-            
-
-                if(order_book != None):                
-                    positiveBids = []
-
-                    for suit in order_book["bids"].keys():
-                        order = order_book["bids"][suit]
-                        if order["order_id"] == -1:
-                            continue
-                        if order["price"] >= self.values[suit]:
-                            positiveBids.append(order)
-                        print(order["player_id"], "bids",
-                            order["suit"], "at price", order["price"])
-                    print("Positive Bids:")
-                    print(positiveBids)
-                    suit = self.accept_bids(positiveBids)
-                    if(suit != None):
-                        await controller.accept_bid(websocket, self.player_id, suit)
+                    if ("order_book" in game_state["data"].keys()):
+                        order_book = game_state["data"]["order_book"]
                 
-                accepted_order = None
-                if (game_state["type"] == "accept_order"):
-                    accepted_order = game_state["data"]["accepted_order"]
-                    accepted_suit = accepted_order["suit"]
-                    accepted_price = accepted_order["price"]
 
-                    self.values[accepted_suit] = (self.c * self.values[accepted_suit] + 1 * accepted_price)/(self.c + 1)
-                    self.c = self.c + 1
+                    if(order_book != None):   
+                        #handle bids
+                        #Find positive ev bids and decide whether or not to accept them
+
+                        positiveBids = []
+
+                        for suit in order_book["bids"].keys():
+                            order = order_book["bids"][suit]
+                            if order["order_id"] == -1:
+                                continue
+                            if order["price"] >= self.values[suit]:
+                                positiveBids.append(order)
+                            print(order["player_id"], "bids",
+                                order["suit"], "at price", order["price"])
+                        print("Positive Bids:")
+                        print(positiveBids)
+                        suit = self.accept_listings(positiveBids, True)
+                        if(suit != None):
+                            await controller.accept_bid(websocket, self.player_id, suit)
                     
+                        #handle offers
+                        positiveOffers = []
 
-                pp.print_state(game_state)
-                #handle listings
-                await asyncio.sleep(1)
-                
+                        for suit in order_book["offers"].keys():
+                            order = order_book["offers"][suit]
+                            if order["order_id"] == -1:
+                                continue
+                            if order["price"] <= self.values[suit]:
+                                positiveOffers.append(order)
+                            print(order["player_id"], "bids",
+                                order["suit"], "at price", order["price"])
+                        print("Positive Offers:")
+                        print(positiveOffers)
+                        suit = self.accept_listings(positiveOffers, False)
+                        if(suit != None):
+                            await controller.accept_offer(websocket, self.player_id, suit)
+
+                    accepted_order = None
+                    if (game_state["type"] == "accept_order"):
+                        accepted_order = game_state["data"]["accepted_order"]
+                        accepted_suit = accepted_order["suit"]
+                        accepted_price = accepted_order["price"]
+
+                        self.values[accepted_suit] = (self.c * self.values[accepted_suit] + 1 * accepted_price)/(self.c + 1)
+                        self.c = self.c + 1
+                        
+
+                    pp.print_state(game_state)
+                    print("Hand:")
+                    print(hand)
+                    print("Current Values:")
+                    print(self.values)
+                    #handle listings
+                    await asyncio.sleep(1)
+
+                except websockets.ConnectionClosed as e:
+                    websocket = await websocket.connect(uri)
 
 
 figgieBot = FiggieNewton(
