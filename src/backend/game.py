@@ -110,7 +110,7 @@ async def end_game():
     global round_number
     global game_id
     winner = max(players, key=lambda player_id: players[player_id].balance)
-    write_games(game_id, players, round_number)
+    #write_games(game_id, players, round_number)
     round_number = 0
     game_id += 1
     await broadcast({"type": "end_game", "data": {"winner": winner}})
@@ -148,7 +148,7 @@ async def end_round():
     pot = 0
     clear_book()
     await broadcast({"type": "end_round"})
-    write_rounds(game_id, round_number, players)
+    #write_rounds(game_id, round_number, players)
     round_number += 1
 
 
@@ -183,12 +183,12 @@ async def place_order(player_id, is_bid, suit, price):
     if is_bid:
         new_order = Bid(next_order_id, player_id, suit, price)
 
-        write_orders(game_id, round_number, is_bid, suit,
-                     price, player_id, None, "place bid")
+        #write_orders(game_id, round_number, is_bid, suit,
+                     #price, player_id, None, "place bid")
     else:
         new_order = Offer(next_order_id, player_id, suit, price)
-        write_orders(game_id, round_number, is_bid, suit,
-                     price, None, player_id, "offer")
+        #write_orders(game_id, round_number, is_bid, suit,
+                     #price, None, player_id, "offer")
 
     order_type, _, prev_order = determine_order(player_id, is_bid, suit)
     action = "bid" if is_bid else "offer"
@@ -233,8 +233,8 @@ async def cancel_order(player_id, is_bid, suit):
     if prev_order.player_id == player_id:
         order_canceled = order_book[order_type][suit]
         order_book[order_type][suit] = empty_order
-        write_orders(game_id, round_number, is_bid, suit,
-                     None, None, player_id, "cancels")
+        #write_orders(game_id, round_number, is_bid, suit,
+                     #None, None, player_id, "cancels")
         await broadcast({
             "type": "cancel_order",
             "data": {

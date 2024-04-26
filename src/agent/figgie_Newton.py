@@ -6,6 +6,7 @@ import random
 import pretty_printer as pp
 import sys
 import cardcounting
+import math
 sys.path.insert(0, "../")
 from util.constants import SUITS, EMPTY_ORDER_BOOK, HEARTS, SPADES, CLUBS, DIAMONDS, EMPTY_BID, EMPTY_OFFER, BROADCAST_PERIOD
 # fmt: on
@@ -32,7 +33,7 @@ class FiggieNewton:
             self.values[suit] = cardcounting.expected_value_buy(suit, starting_hand[suit], deck_dist)
     
     def pdfAccept(self, order):
-        cutoff = random.randint(self.values[order["suit"]], self.values[order["suit"]] + self.pAccept)
+        cutoff = random.randint(math.ceil(self.values[order["suit"]]), math.ceil(self.values[order["suit"]] + self.pAccept))
         print(cutoff, order["price"])
         if(order["price"] >= cutoff):
             print("Accepting Bid")
@@ -40,7 +41,7 @@ class FiggieNewton:
         return False
 
     def pdfOffer(self, order):
-        cutoff = random.randint(self.values[order["suit"]] - self.pList, self.values[order["suit"]])
+        cutoff = random.randint(math.floor(self.values[order["suit"]] - self.pList), math.floor(self.values[order["suit"]]))
         print(cutoff, order["price"])
         if(order["price"] <= cutoff):
             print("Accepting Offer")
@@ -68,7 +69,7 @@ class FiggieNewton:
             
 
     async def run(self):
-        async with websockets.connect(uri) as websocket:
+        async with websockets.connect(uri, ping_timeout=40) as websocket:
             await controller.add_player(websocket, self.player_id)
             if (self.start_round):
                 await controller.start_round(websocket)
@@ -155,8 +156,10 @@ class FiggieNewton:
                     #handle listings
                     await asyncio.sleep(1)
 
-                except websockets.ConnectionClosed as e:
-                    websocket = await websocket.connect(uri)
+                except (asyncio.TimeoutError, websockets.exceptions.ConnectionClosed):  
+                    pong = await websocket.ping()
+                    await asyncio.wait_for(pong, timeout=self.ping_timeout)
+                    print('Ping OK, keeping connection alive...')
 
 
 figgieBot = FiggieNewton(
