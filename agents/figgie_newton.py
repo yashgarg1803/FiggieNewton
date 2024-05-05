@@ -38,7 +38,7 @@ class FiggieNewton(Player):
         if(update_data["hand"] != None):
             self.hand = update_data["hand"]
         if(update_data["type"] == "round_start"):
-            self.assign_prior(update_data["hand"])
+            self.assign_prior({self.player_id: update_data["hand"]})
             # print(self.hand)
             # print(self.values)
             return
@@ -49,9 +49,9 @@ class FiggieNewton(Player):
             self.c = self.c + 1
 
     def assign_prior(self, starting_hand):
-        deck_dist = cardcounting.deck_distribution([starting_hand])
-        for suit in starting_hand:
-            self.values[suit] = cardcounting.expected_value_buy(suit, starting_hand[suit], deck_dist)
+        deck_dist = cardcounting.deck_distribution(starting_hand)
+        for suit in starting_hand[self.player_id].keys():
+            self.values[suit] = cardcounting.expected_value_buy(suit, starting_hand[self.player_id][suit], deck_dist)
 
     def try_accept_bid(self):
         positiveBids = []
