@@ -2,9 +2,10 @@ from engine.game import Game
 from util.classes import Player
 from util import constants
 from agents.random import RandomPlayer
+from agents.human import HumanPlayer
 
 g = Game(show_messages=False)
-p1 = RandomPlayer("Player 1")
+p1 = HumanPlayer()
 p2 = RandomPlayer("Player 2")
 p3 = RandomPlayer("Player 3")
 p4 = RandomPlayer("Player 4")
