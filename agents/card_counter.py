@@ -30,7 +30,7 @@ class CardCounter(Player):
 
         if(update_data["hand"] != None):
             self.hand = update_data["hand"]
-            self.count = self.hand
+            self.count[self.player_id] = self.hand
         if(update_data["order_book"] != None):
             self.order_book = update_data["order_book"] 
         if(update_data["type"] == "round_start"):
