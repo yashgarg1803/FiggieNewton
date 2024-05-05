@@ -5,9 +5,6 @@ from util.constants import SUITS, EMPTY_ORDER_BOOK, HEARTS, SPADES, CLUBS, DIAMO
 from util.classes import Player, Bid, Offer
 import copy
 
-
-
-
 class Game:
     game_number = 0
     
@@ -154,7 +151,11 @@ class Game:
                 elif message["type"] == "accept":
                     suit = message["suit"]
                     order_type = message["order_type"]
-                    tick_accepts.append((player_id, suit, order_type))
+                    if self.order_book[order_type + "s"][suit].player_id != player_id \
+                            and self.order_book[order_type + "s"][suit].player_id != -1:
+                        tick_accepts.append((player_id, suit, order_type))
+                    else:
+                        self.print_message(f"player {player_id} made an invalid action")
 
                 elif message["type"] == "cancel":
                     suit = message["suit"]
@@ -166,10 +167,6 @@ class Game:
                 
                 else:
                     self.print_message(f"player {player_id} made an invalid action")
-                    player.send_update({
-                        "type": "invalid_action",
-                        "action": message
-                    })
 
                 
             update = self.process_tick(tick_place_orders, tick_accepts, tick_cancels)
@@ -252,18 +249,3 @@ class Game:
         self.pot = 0
         self.player_hands = {}
         self.num_of_goal_suit = None
-
-
-
-g = Game()
-p1 = Player("1")
-p2 = Player("2")
-p3 = Player("3")
-p4 = Player("4")
-p5 = Player("5")
-g.add_player(p1)
-g.add_player(p2)
-g.add_player(p3)
-g.add_player(p4)
-g.add_player(p5)
-g.start_game(5)

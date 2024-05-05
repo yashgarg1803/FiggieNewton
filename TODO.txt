@@ -1,0 +1,24 @@
+
+
+
+
+
+
+
+
+OLD:
+Tasks:
+*- implement accept function (JOSEPH)
+*- make new bids/offers accept automatically if should (YASH)
+
+- implement listing function
+
+- make it based on ticks, not seconds
+- implement actual prior function
+
+Model Improvements:
+- update function should update all suits, not just the accepted suit
+- 
+
+Completed:
+- implement update function (YASH) 
