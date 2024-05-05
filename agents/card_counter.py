@@ -32,8 +32,10 @@ class CardCounter(Player):
             self.hand = update_data["hand"]
         if(update_data["order_book"] != None):
             self.order_book = update_data["order_book"] 
+        if(update_data["type"] == "round_start"):
+            self.count = {}
         if(update_data["type"] == "accept"):
-            self.count = cardcounting.count(self.count, update_data)
+            self.count = cardcounting.count_cards(self.count, update_data)
 
     def try_accept_bid(self):
         bestBid =  copy.deepcopy(constants.EMPTY_BID).toDict()

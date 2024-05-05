@@ -40,17 +40,26 @@ def count_cards(count, trade):
         seller = trade["party_id"]
     else:
         buyer = trade["party_id"]
-        seller = trade["counterParty_id"]
+        seller = trade["counterparty_id"]
 
     suit = trade['suit']
-
+    if seller not in count:
+        count[seller] = {}
+    if suit not in count[seller]:
+        count[seller][suit] = 0
     if count[seller][suit] < 1:
         count[seller][suit] = 0
     else:
         count[seller][suit] -= 1
-
+    if buyer not in count:
+        count[buyer] = {}
+    if suit not in count[buyer]:
+        count[buyer][suit] = 0
     count[buyer][suit] += 1
-
+    for player_id in count:
+        print(f"\t{player_id}")
+        for suit in count[player_id]:
+            print(f"\t\t{suit}: {count[player_id][suit]}")
     return count
 
 
@@ -59,17 +68,17 @@ def deck_distribution(player_hands):
     Return probability of being in each deck given the list of counted cards. 
     """
     total = EMPTY_DECK.copy()
-    for hand in player_hands:
-        for suit in hand:
-            total[suit] += hand[suit]
+    for player_id in player_hands.keys():
+        for suit in player_hands[player_id].keys():
+            total[suit] += player_hands[player_id][suit]
 
     m = [0] * 12
     for i in range(12):
         combs = 1
         for suit in total:
             combs *= math.comb(POSSIBLE_DECKS[i][suit], total[suit])
+        
         m[i] = combs
-
     total_combs = sum(m)
     for i in range(12):
         m[i] /= total_combs
