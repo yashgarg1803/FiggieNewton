@@ -30,11 +30,13 @@ class CardCounter(Player):
 
         if(update_data["hand"] != None):
             self.hand = update_data["hand"]
+            self.count = self.hand
         if(update_data["order_book"] != None):
             self.order_book = update_data["order_book"] 
         if(update_data["type"] == "round_start"):
             self.count = {}
         if(update_data["type"] == "accept"):
+            print(update_data["message"])
             self.count = cardcounting.count_cards(self.count, update_data)
 
     def try_accept_bid(self):

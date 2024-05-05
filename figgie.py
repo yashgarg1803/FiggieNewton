@@ -36,6 +36,6 @@ g.add_player(p1)
 g.add_player(p2)
 g.add_player(p3)
 g.add_player(p4)
-num_rounds = 100
+num_rounds = 1
 g.start_game(num_rounds)
 print([g.balances[player_id]/num_rounds for player_id in g.players])

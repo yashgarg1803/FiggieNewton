@@ -222,6 +222,7 @@ class Game:
                 "order_type": order_type,
                 "suit": suit,
                 "price": price,
+                "message": f"'{party_id}' {party_action} '{counterparty_id}' at {price}",
             }
 
         for cancel in tick_cancels:
@@ -243,6 +244,7 @@ class Game:
                 "order_type": order_type,
                 "suit": suit,
                 "price": price,
+                "message": f"'{party_id}' {party_action} {suit} at {price}",
             }
         
         return {
