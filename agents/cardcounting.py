@@ -4,6 +4,7 @@ import sys
 sys.path.insert(0, "../")
 from util import constants
 from util.constants import SPADES, CLUBS, HEARTS, DIAMONDS, EMPTY_DECK
+import copy
 # fmt: on
 
 SUIT_NUMS = {SPADES: 0, CLUBS: 1, HEARTS: 2, DIAMONDS: 3}
@@ -44,17 +45,17 @@ def count_cards(count, trade):
 
     suit = trade['suit']
     if seller not in count:
-        count[seller] = {}
-    if suit not in count[seller]:
-        count[seller][suit] = 0
+        count[seller] = copy.deepcopy(EMPTY_DECK)
+    # if suit not in count[seller]:
+    #     count[seller][suit] = 0
     if count[seller][suit] < 1:
         count[seller][suit] = 0
     else:
         count[seller][suit] -= 1
-    if buyer not in count:
-        count[buyer] = {}
-    if suit not in count[buyer]:
-        count[buyer][suit] = 0
+    # if buyer not in count:
+    #     count[buyer] = {}
+    # if suit not in count[buyer]:
+    #     count[buyer][suit] = 0
     count[buyer][suit] += 1
     for player_id in count:
         print(f"\t{player_id}")
