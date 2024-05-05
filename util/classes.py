@@ -34,6 +34,9 @@ class Bid:
 
     def toDict(self):
         return self.__dict__
+    
+    def __str__(self):
+        return f"{self.player_id}, {self.price}"
 
 
 class Offer:
@@ -44,3 +47,6 @@ class Offer:
 
     def toDict(self):
         return self.__dict__
+    
+    def __str__(self):
+        return f"{self.player_id}, {self.price}"

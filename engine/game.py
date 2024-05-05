@@ -20,6 +20,8 @@ class Game:
         self.players[player.player_id] = player
 
     def print_message(self, message):
+        if "invalid" in message:
+            return
         if self.show_messages:
             print(message)
 
@@ -95,7 +97,7 @@ class Game:
         while self.round_number < num_rounds:
             self.do_round()
 
-        print("game over")
+        self.print_message("game over")
         self.print_message(f"final balances: {self.balances}")
     
     def do_round(self):
@@ -126,23 +128,25 @@ class Game:
 
 
                 if message["type"] == "place":
-                    price = message["price"]
+                    price = int(round(message["price"]))
                     suit = message["suit"]
                     order_type = message["order_type"]
                     order_side = order_type + "s" # bc orderbook is a dict of 'bids' and 'offers'
                     counterorder_type = "bid" if order_type == "offer" else "offer"
                     counterorder_side = counterorder_type + "s"
+                    sign = 1 if order_type == "bid" else -1
 
                     # an order at least as good as counterorder becomes an accepted order if different player
                     # if same player it should be a cancel if greater (same is a valid order)
                     # if better than current order, it should be placed
                     counterorder_id = self.order_book[counterorder_side][suit].player_id
                     counterorder_price = self.order_book[counterorder_side][suit].price
-                    if counterorder_id != -1 and player_id != counterorder_id and price >= counterorder_price:
+                    if counterorder_id != -1 and player_id != counterorder_id and sign * price >= sign * counterorder_price:
                         tick_accepts.append((player_id, suit, counterorder_type))
-                    elif counterorder_id != -1 and player_id == counterorder_id and price >= counterorder_price:
+                    elif counterorder_id != -1 and player_id == counterorder_id and sign * price >= sign * counterorder_price:
                         tick_cancels.append((player_id, suit, counterorder_type))
-                    elif (order_type == "bid" and price > self.order_book[order_side][suit].price) \
+                    elif self.order_book[order_side][suit].player_id == -1 \
+                            or (order_type == "bid" and price > self.order_book[order_side][suit].price) \
                             or (order_type == "offer" and price < self.order_book[order_side][suit].price and self.player_hands[player_id][suit] > 0): 
                         tick_place_orders.append((player_id, suit, price, order_type))
                     else:
@@ -183,20 +187,22 @@ class Game:
             price = counterorder.price
 
             if order_type == "bid":
+                # party is accepting the bid of the counterparty => party is selling
+                self.players[counterparty_id].balance -= price
+                self.player_hands[party_id][suit] -= 1
+
+                self.players[party_id].balance += price
+                self.player_hands[counterparty_id][suit] += 1
+            else:
+                # party is accepting the offer of the counterparty => party is buying
                 self.players[party_id].balance -= price
                 self.player_hands[counterparty_id][suit] -= 1
-                
-                self.players[counterparty_id].balance += price
+
                 self.player_hands[party_id][suit] += 1
-            else:
-                self.players[party_id].balance += price
-                self.player_hands[party_id][suit] -= 1
-                
-                self.players[counterparty_id].balance -= price
-                self.player_hands[counterparty_id][suit] += 1
+                self.players[counterparty_id].balance += price
 
             self.order_book = copy.deepcopy(EMPTY_ORDER_BOOK)
-            party_action = f"buys {suit} from" if order_type == "bid" else f"sells {suit} to"
+            party_action = f"sells {suit} to" if order_type == "bid" else f"buys {suit} from"
             self.print_message(f"'{party_id}' {party_action} '{counterparty_id}' at {price}")
             return {
                 "type": "accept",

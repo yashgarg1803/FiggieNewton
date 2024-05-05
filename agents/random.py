@@ -11,11 +11,11 @@ class RandomPlayer(Player):
     
     def get_action(self):
         r = random.random()
-        if r > 0.75:
+        if r > 0.55:
             return self.place_bid()
-        elif r > 0.5:
+        elif r > 0.1:
             return self.place_offer()
-        elif r > 0.25:
+        elif r > 0:
             return self.accept()
         else:
             return {"type": "pass", "action": "pass"}
@@ -23,12 +23,12 @@ class RandomPlayer(Player):
 
     def place_bid(self):
         suit = random.choice(constants.SUITS)
-        price = random.randint(0, 100)
+        price = random.betavariate(1, 5) * 13
         return {"type": "place", "action": "place_bid", "suit": suit, "price": price, "order_type": "bid"}
     
     def place_offer(self):
         suit = random.choice(constants.SUITS)
-        price = random.randint(0, 100)
+        price = random.betavariate(5, 2) * 13
         return {"type": "place", "action": "place_offer", "suit": suit, "price": price, "order_type": "offer"}
     
     def accept(self):
