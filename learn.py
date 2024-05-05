@@ -19,9 +19,8 @@ TEST_SUITE = [
     }
 ]
 
-def evaluate_player(player):
+def evaluate_player(player, num_rounds=100):
     sum = 0
-    num_rounds = 100
     for test in TEST_SUITE:
         g = Game(show_messages=False)
         g.add_player(player)
@@ -35,7 +34,7 @@ def evaluate_player(player):
     return score
 
 # parameters = min, max, initial, for each parameter
-def hill_climbing(player_class, parameters, iterations=10):
+def hill_climbing(player_class, parameters, iterations=10, num_rounds=100):
     initial_parameters = []
     step_sizes = []
     for parameter in parameters:
@@ -45,7 +44,7 @@ def hill_climbing(player_class, parameters, iterations=10):
         step_sizes.append(parameter["step_size"])
     player = player_class("TEST PLAYER", initial_parameters)
 
-    cur_score = evaluate_player(player)
+    cur_score = evaluate_player(player, num_rounds)
 
     for i in range(iterations):
         print("Iteration: ", i, cur_score)
@@ -57,7 +56,7 @@ def hill_climbing(player_class, parameters, iterations=10):
             step_size = step_sizes[j]
             new_parameters[j] += step_size
             test_player1 = player_class("TEST PLAYER", new_parameters)
-            test_score1 = evaluate_player(test_player1)
+            test_score1 = evaluate_player(test_player1, num_rounds)
             if(test_score1 > cur_score):
                 scores.append((test_score1, j, 1)) # tuple (score, parameter index, direction)
             new_parameters[j] -= step_size
@@ -65,7 +64,7 @@ def hill_climbing(player_class, parameters, iterations=10):
             #step left for parameter j
             new_parameters[j] -= step_size
             test_player2 = player_class("TEST PLAYER", new_parameters)
-            test_score2 = evaluate_player(test_player2)
+            test_score2 = evaluate_player(test_player2, num_rounds)
             if(test_score2 > cur_score):
                 scores.append((test_score2, j, -1))
             new_parameters[j] += step_size
@@ -76,9 +75,12 @@ def hill_climbing(player_class, parameters, iterations=10):
             best = scores[-1]  
             cur_score = best[0] 
             new_parameters[best[1]] += best[2] * step_sizes[best[1]]
+            step_sizes[best[1]] *= 1.1
 
         else:
-            cur_score = evaluate_player(player_class("TEST PLAYER", new_parameters))
+            cur_score = evaluate_player(player_class("TEST PLAYER", new_parameters), num_rounds)
+            for j in range(0, len(step_sizes)):
+                step_sizes[j] *= 0.9
         #stochastic version
         #best = random.choice(scores, weights=[x - cur_score for x in scores])
         
