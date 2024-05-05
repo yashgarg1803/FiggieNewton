@@ -29,7 +29,7 @@ class Game:
         self.next_order_id = 0
         self.round_number += 1
         self.order_book = copy.deepcopy(EMPTY_ORDER_BOOK)
-        self.goal_suit = SUITS[random.randint(0, 3)]
+        
 
         self.player_hands = {} # map of (player_id, deck of cards (dict of suit: count))
         for player_id in self.players:
@@ -50,7 +50,7 @@ class Game:
         shuffles deck and then distribute cards to each player
         """
         deck = []
-
+        self.goal_suit = SUITS[random.randint(0, 3)]
         # same color but not goal suit gets 12
         if self.goal_suit == HEARTS:
             deck.extend([DIAMONDS] * 12)
@@ -176,6 +176,8 @@ class Game:
             update = self.process_tick(tick_place_orders, tick_accepts, tick_cancels)
             update["order_book"] = self.order_book
             for player_id in self.players:
+                #player_update = copy.deepcopy(update)
+                update["hand"] = self.player_hands[player_id]
                 self.players[player_id].send_update(update)
     
     def process_tick(self, tick_place_orders, tick_accepts, tick_cancels):
