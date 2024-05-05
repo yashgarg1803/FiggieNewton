@@ -136,6 +136,10 @@ class Game:
                     counterorder_side = counterorder_type + "s"
                     sign = 1 if order_type == "bid" else -1
 
+                    # need card to sell it
+                    if order_type == "offer" and self.player_hands[player_id][suit] == 0:
+                        self.print_message(f"player {player_id} made an invalid action")
+                        continue
                     # an order at least as good as counterorder becomes an accepted order if different player
                     # if same player it should be a cancel if greater (same is a valid order)
                     # if better than current order, it should be placed
@@ -147,7 +151,7 @@ class Game:
                         tick_cancels.append((player_id, suit, counterorder_type))
                     elif self.order_book[order_side][suit].player_id == -1 \
                             or (order_type == "bid" and price > self.order_book[order_side][suit].price) \
-                            or (order_type == "offer" and price < self.order_book[order_side][suit].price and self.player_hands[player_id][suit] > 0): 
+                            or (order_type == "offer" and price < self.order_book[order_side][suit].price): 
                         tick_place_orders.append((player_id, suit, price, order_type))
                     else:
                         self.print_message(f"player {player_id} made an invalid action")
@@ -155,6 +159,11 @@ class Game:
                 elif message["type"] == "accept":
                     suit = message["suit"]
                     order_type = message["order_type"]
+                    # need card to sell it
+                    if order_type == "offer" and self.player_hands[player_id][suit] == 0:
+                        self.print_message(f"player {player_id} made an invalid action")
+                        continue
+
                     if self.order_book[order_type + "s"][suit].player_id != player_id \
                             and self.order_book[order_type + "s"][suit].player_id != -1:
                         tick_accepts.append((player_id, suit, order_type))
