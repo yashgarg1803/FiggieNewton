@@ -5,8 +5,8 @@ from agents.random import RandomPlayer
 from agents.human import HumanPlayer
 from agents.figgienewton import FiggieNewton
 from agents.card_counter import CardCounter
-import learn
-import learn1
+from matplotlib import pyplot as plt
+import FiggieNewton.learn as learn
 
 
 parameters = [
@@ -25,19 +25,42 @@ parameters = [
     {
         "min": 0.0,
         "max": 2.0,
-<<<<<<< HEAD
         "initial": 1.5,
         "step_size": .2
     },
 ]
-print(learn1.hill_climbing(FiggieNewton, parameters, iterations=100, num_rounds=10))
-=======
-        "initial": .25,
-        "step_size": .2
-    },
-]
-print(learn1.hill_climbing(FiggieNewton, parameters, iterations=100, num_rounds=1000))
->>>>>>> 96fef0f4029901e6d5e4bc5bae4f52efc2e39e29
+
+points = 50
+y = []
+x = []
+
+x1 = []
+y1 = []
+
+
+# temp = learn.hill_climbing(FiggieNewton, [{"min": 0.0, "max": 2.0, "initial": .5, "step_size": .1}], iterations=30, num_rounds=40)
+# for i in range(0, len(temp[1])):
+#     y = temp[1]
+#     x.append(i)
+# plt.plot(x, y)
+# plt.title("Hill Climb Scores")
+# plt.xlabel("Iteration Number")
+# plt.ylabel("Score")
+# ax = plt.gca()
+# plt.show()
+
+for i in range(0, points):
+    increment = 2.0 / points
+    temp = learn1.hill_climbing(FiggieNewton, [{"min": 0.0, "max": 2.0, "initial": increment * i, "step_size": .2}], iterations=1, num_rounds=50)
+    y.append(temp[0])
+    x.append(i * increment)
+    y1.append(temp[1])
+    x1.append(i * increment)
+a = plt.scatter(x, y, label="Converge")
+a.ylim([0, 60])
+plt.show()
+b = plt.scatter(x1, y1, label="Profit Attained")
+plt.show()
 
 # g = Game(show_messages=False)
 # p1 = FiggieNewton("FiggieNewton", [3.5, 2])
