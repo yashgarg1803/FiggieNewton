@@ -266,6 +266,16 @@ class Game:
         num_winners = len(max_winners)
         for player_id in max_winners:
             self.players[player_id].balance += (self.pot - self.num_of_goal_suit * 10) / num_winners
+        self.balances = {player_id: self.players[player_id].balance for player_id in self.players}
+        for player_id in self.players:
+            self.players[player_id].send_update({
+                "type": "round_end",
+                "balances": self.balances,
+                "player_hands": self.player_hands,
+                "goal_suit": self.goal_suit,
+                "num_of_goal_suit": self.num_of_goal_suit,
+                "order_book": None
+            })
 
         self.order_book = copy.deepcopy(EMPTY_ORDER_BOOK)
         self.goal_suit = None
