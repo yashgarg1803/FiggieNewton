@@ -12,7 +12,7 @@ class FiggieNewton(Player):
     def __init__(self, id, parameters):
         super(FiggieNewton, self).__init__(id)
         # pAccept = 1
-        pList = 1
+        pList = 20
         r = 3
         d = 1
         c = parameters[0]

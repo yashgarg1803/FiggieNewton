@@ -25,11 +25,11 @@ parameters = [
     {
         "min": 0.0,
         "max": 2.0,
-        "initial": .25,
+        "initial": 1.5,
         "step_size": .2
     },
 ]
-print(learn1.hill_climbing(FiggieNewton, parameters, iterations=100, num_rounds=1000))
+print(learn1.hill_climbing(FiggieNewton, parameters, iterations=100, num_rounds=10))
 
 # g = Game(show_messages=False)
 # p1 = FiggieNewton("FiggieNewton", [3.5, 2])

@@ -94,6 +94,8 @@ class Game:
             self.print_message("not enough players")
             return
         
+        for player_id in self.players:
+            self.players[player_id].balance = 0
         while self.round_number < num_rounds:
             self.do_round()
 

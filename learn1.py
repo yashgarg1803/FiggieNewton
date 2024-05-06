@@ -13,7 +13,7 @@ TEST_SUITE = [
     {
         "name": "All Random",
         "players": [
-            FiggieNewton("FiggieBlind", [3, 1, 0]),
+            FiggieNewton("FiggieBlind", [0]),
             # CardCounter("CC1", [3, 1]),
             MLEPlayer("M2"),
             MLEPlayer("M3"),
@@ -26,11 +26,12 @@ def evaluate_player(player, num_rounds=100):
     sum2 = 0
     for test in TEST_SUITE:
         g = Game(show_messages=False)
-        g.add_player(player)
+        
         i = 2
         for test_class in test["players"]:
             g.add_player(test_class)
             i += 1
+        g.add_player(player)
         g.start_game(num_rounds)
         sum += g.balances[player.player_id]
         sum2 += g.balances["FiggieBlind"]
@@ -85,8 +86,9 @@ def hill_climbing(player_class, parameters, iterations=10, num_rounds=100):
         
         #simple hill climbing
         if(len(scores) > 0):
-            sorted(scores, key=lambda x : x[0])
+            scores = sorted(scores, key=lambda x : x[0])
             best = scores[-1]  
+
             cur_diff = abs(best[0] - cur_score)
             cur_score = best[0] 
             new_parameters[best[1]] += best[2] * best[3]
