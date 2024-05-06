@@ -6,23 +6,30 @@ from agents.human import HumanPlayer
 from agents.figgienewton import FiggieNewton
 from agents.card_counter import CardCounter
 import learn
+import learn1
 
 
 parameters = [
+    # {
+    #     "min": 1.1,
+    #     "max": 100.0,
+    #     "initial": 15.0,
+    #     "step_size": 10.0
+    # },
+    # {
+    #     "min": 0.01,
+    #     "max": 50.0,
+    #     "initial": 5.0,
+    #     "step_size": 5.0
+    # },
     {
-        "min": 1.1,
-        "max": 10,
-        "initial": 5,
-        "step_size": 1
-    },
-    {
-        "min": 0,
-        "max": 50,
-        "initial": 4,
-        "step_size": 0.4
+        "min": 0.0,
+        "max": 2.0,
+        "initial": .25,
+        "step_size": .2
     },
 ]
-print(learn.hill_climbing(CardCounter, parameters, iterations=100, num_rounds=20))
+print(learn1.hill_climbing(FiggieNewton, parameters, iterations=100, num_rounds=1000))
 
 # g = Game(show_messages=False)
 # p1 = FiggieNewton("FiggieNewton", [3.5, 2])
