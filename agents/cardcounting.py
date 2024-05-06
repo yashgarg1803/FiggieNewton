@@ -7,7 +7,7 @@ from util.constants import SPADES, CLUBS, HEARTS, DIAMONDS, EMPTY_DECK
 import copy
 # fmt: on
 
-SUIT_NUMS = {SPADES: 0, CLUBS: 1, HEARTS: 2, DIAMONDS: 3}
+SUIT_NUMS = {CLUBS: 0, SPADES: 1, DIAMONDS: 2, HEARTS: 3}
 
 DECK0 = {SPADES: 12, CLUBS: 8, HEARTS: 10, DIAMONDS: 10}
 DECK1 = {SPADES: 12, CLUBS: 10, HEARTS: 8, DIAMONDS: 10}
@@ -36,6 +36,7 @@ def count_cards(count, trade):
     """
     buyer = ""
     seller = ""
+
     if(trade["order_type"] == "bid"):
         buyer = trade["counterparty_id"]
         seller = trade["party_id"]
@@ -52,26 +53,23 @@ def count_cards(count, trade):
         count[seller][suit] = 0
     else:
         count[seller][suit] -= 1
-    # if buyer not in count:
-    #     count[buyer] = {}
-    # if suit not in count[buyer]:
-    #     count[buyer][suit] = 0
+    if buyer not in count:
+        count[buyer] = copy.deepcopy(EMPTY_DECK)
+    
     count[buyer][suit] += 1
-    for player_id in count:
-        print(f"\t{player_id}")
-        for suit in count[player_id]:
-            print(f"\t\t{suit}: {count[player_id][suit]}")
     return count
-
 
 def deck_distribution(player_hands):
     """
     Return probability of being in each deck given the list of counted cards. 
     """
-    total = EMPTY_DECK.copy()
-    for player_id in player_hands.keys():
-        for suit in player_hands[player_id].keys():
+    total = {HEARTS: 0, DIAMONDS: 0, CLUBS: 0, SPADES: 0}
+    for player_id in player_hands:
+        for suit in player_hands[player_id]:
             total[suit] += player_hands[player_id][suit]
+    for suit in total:
+        if total[suit] > 12:
+            raise ValueError("Too many cards counted")
 
     m = [0] * 12
     for i in range(12):
@@ -87,45 +85,51 @@ def deck_distribution(player_hands):
     return m
 
 
-def expected_value_buy(suit, suit_count, m):
+def expected_value_buy(suit, suit_count, m, r=3.5, d=1):
     """
     Return expected value for card being bought. 
     suit_count is # of cards of a suit in YOUR hand.
     """
     expected_value = 0
     for i in range(12):
-        expected_value += m[i] * value_card(i, suit, suit_count)
+        expected_value += m[i] * value_card(i, suit, suit_count, r, d)
     return expected_value
 
 
-def expected_value_sell(suit, suit_count, m):
+def expected_value_sell(suit, suit_count, m, r=3.5, d=1):
     """
     Return expected value for card being sold. 
     suit_count is # of cards of a suit in YOUR hand.
     """
-    return expected_value_buy(suit, suit_count - 1, m)
+    return expected_value_buy(suit, suit_count - 1, m, r, d)
 
 
-def value_card(deck_index, suit, suit_count):
+def value_card(deck_index, suit, suit_count, r, d):
     """
     Return value of a given suit's card given the current deck. 
     """
     suit_num = SUIT_NUMS[suit] * 3
     if deck_index == suit_num or deck_index == suit_num + 1 or deck_index == suit_num + 2:
-        return 10 + value_payout(deck_index, suit_count)
+        return 10 + value_payout(deck_index, suit_count, r, d)
     return 0
 
 
-def value_payout(deck_index, suit_count):
+def value_payout(deck_index, suit_count, r=3.5, d=1):
     """
     Return value of a given suit given a deck and the number of cards of that suit held. 
     """
-    return 0
-    return (suit_count < MAJORITIES[deck_index]) * suit_count
-    r = 3.5  # subject to change
+    # return 0
+    # return suit_count * (suit_count < MAJORITIES[deck_index])
+    # subject to change
     if suit_count < MAJORITIES[deck_index]:
+        if r <= 1:
+            return PAYOUTS[deck_index] / (MAJORITIES[deck_index] * d)
+        if d >= 100:
+            return 0
+        
         payout = PAYOUTS[deck_index]
-        value = payout * (1 - r) * (r ** suit_count) / \
-            (1 - r ** MAJORITIES[deck_index])
-        return value
+        value = payout * (1 - r) * (r ** suit_count) / (1 - r ** MAJORITIES[deck_index])
+        return value / d
     return 0
+
+    # return count_valuations[suit_count]

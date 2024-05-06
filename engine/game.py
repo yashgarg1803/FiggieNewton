@@ -160,7 +160,7 @@ class Game:
                     suit = message["suit"]
                     order_type = message["order_type"]
                     # need card to sell it
-                    if order_type == "offer" and self.player_hands[player_id][suit] == 0:
+                    if order_type == "bid" and self.player_hands[player_id][suit] == 0:
                         self.print_message(f"player {player_id} made an invalid action")
                         continue
 
@@ -198,6 +198,8 @@ class Game:
             price = counterorder.price
 
             if order_type == "bid":
+                if self.player_hands[party_id][suit] == 0:
+                    raise Exception("invalid action")
                 # party is accepting the bid of the counterparty => party is selling
                 self.players[counterparty_id].balance -= price
                 self.player_hands[party_id][suit] -= 1
@@ -205,6 +207,8 @@ class Game:
                 self.players[party_id].balance += price
                 self.player_hands[counterparty_id][suit] += 1
             else:
+                if self.player_hands[counterparty_id][suit] == 0:
+                    raise Exception("invalid action")
                 # party is accepting the offer of the counterparty => party is buying
                 self.players[party_id].balance -= price
                 self.player_hands[counterparty_id][suit] -= 1

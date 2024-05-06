@@ -4,14 +4,17 @@ from util.classes import Player
 import random
 from agents import cardcounting
 import math
+import copy
 sys.path.insert(0, "../")
 
 class FiggieNewton(Player):
     # parameters = pAccept, PList, c
     def __init__(self, id, parameters):
         super(FiggieNewton, self).__init__(id)
-        pAccept = parameters[0]
-        pList = parameters[1]
+        pAccept = 1
+        pList = 1
+        r = parameters[0]
+        d = parameters[1]
         c = parameters[2]
         
         self.hand = {}
@@ -19,7 +22,10 @@ class FiggieNewton(Player):
         self.pList = pList
         self.c = c
         self.order_book = None
+        self.r = r
+        self.d = d
         self.values = {constants.CLUBS: 3, constants.DIAMONDS: 3, constants.HEARTS: 3, constants.SPADES: 3}
+        self.count = {}
 
     def get_action(self):
         if(self.order_book != None):   
@@ -31,27 +37,51 @@ class FiggieNewton(Player):
             if(b != None):
                 #print(b)
                 return b
+        return {"type": "pass", "action": "pass"}
         return self.try_list()    
     
     def send_update(self, update_data):
-
-        if(update_data["hand"] != None):
-            self.hand = update_data["hand"]
         if(update_data["type"] == "round_start"):
-            self.assign_prior({self.player_id: update_data["hand"]})
+            self.count = {}
+            self.hand = update_data["hand"]
+            self.count[self.player_id] = copy.deepcopy(self.hand)
             # print(self.hand)
-            # print(self.values)
-            return
+            # print(self.count)
+            self.assign_prior()
+            self.order_book = update_data["order_book"] 
+        # if update_data["hand"] != None:
+        #     self.hand = update_data["hand"]
         if(update_data["order_book"] != None):
             self.order_book = update_data["order_book"] 
+        
         if(update_data["type"] == "accept"):
-            self.values[update_data["suit"]] = (self.c * self.values[update_data["suit"]] + 1 * update_data["price"])/(self.c + 1)
-            self.c = self.c + 1
+            self.count = cardcounting.count_cards(self.count, update_data)
+            
+            from util.constants import EMPTY_DECK
+            total = {constants.HEARTS: 0, constants.DIAMONDS: 0, constants.CLUBS: 0, constants.SPADES: 0}
+            player_hands = self.count
+            for player_id in player_hands.keys():
+                for suit in player_hands[player_id].keys():
+                    total[suit] += player_hands[player_id][suit]
+            for suit in total:
+                if total[suit] > 12:
+                    raise ValueError("Too many cards counted")
 
-    def assign_prior(self, starting_hand):
-        deck_dist = cardcounting.deck_distribution(starting_hand)
-        for suit in starting_hand[self.player_id].keys():
-            self.values[suit] = cardcounting.expected_value_buy(suit, starting_hand[self.player_id][suit], deck_dist)
+            # print("action: ", update_data["message"])
+            # print("total: ", total)
+            # print("hand: ", self.hand)
+            # print("values: ", self.values)
+            # print("dist: ", cardcounting.deck_distribution(self.count))
+            # print()
+
+            suit = update_data["suit"]
+            val = cardcounting.expected_value_buy(suit, self.count[self.player_id][suit], cardcounting.deck_distribution(self.count), r=self.r, d=self.d)
+            self.values[suit] = (self.c * val + 1 * update_data["price"])/(self.c + 1)
+
+    def assign_prior(self):
+        deck_dist = cardcounting.deck_distribution(self.count)
+        for suit in self.count[self.player_id].keys():
+            self.values[suit] = cardcounting.expected_value_buy(suit, self.count[self.player_id][suit], deck_dist, self.r, self.d)
 
     def try_accept_bid(self):
         positiveBids = []
@@ -124,14 +154,16 @@ class FiggieNewton(Player):
         best = 0
         suit = None
         for order in orders:
-            if(isBid and self.pdfAccept(order)):
+            # if(isBid and self.pdfAccept(order)):
+            if (isBid):
                 diff = order["price"] - self.values[order["suit"]]
                 #print(diff, best)
                 if(diff > best):
                     best = diff
                     suit = order["suit"]
 
-            if(not isBid and self.pdfOffer(order)):
+            # if(not isBid and self.pdfOffer(order)):
+            if (not isBid):
                 diff = self.values[order["suit"]] - order["price"]
                 #print(diff, best)
                 if(diff > best):
