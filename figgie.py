@@ -25,11 +25,19 @@ parameters = [
     {
         "min": 0.0,
         "max": 2.0,
+<<<<<<< HEAD
         "initial": 1.5,
         "step_size": .2
     },
 ]
 print(learn1.hill_climbing(FiggieNewton, parameters, iterations=100, num_rounds=10))
+=======
+        "initial": .25,
+        "step_size": .2
+    },
+]
+print(learn1.hill_climbing(FiggieNewton, parameters, iterations=100, num_rounds=1000))
+>>>>>>> 96fef0f4029901e6d5e4bc5bae4f52efc2e39e29
 
 # g = Game(show_messages=False)
 # p1 = FiggieNewton("FiggieNewton", [3.5, 2])
